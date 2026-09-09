@@ -1,0 +1,28 @@
+{
+  "_comment": "Shared AEAD known-answer test vectors for cross-implementation consistency. All three SPsec implementations (this repo's C participant, the sibling canopens_configurator_linux C configurator, and the canopens_configurator_python submodule) must produce byte-identical ciphertext+tag for these fixed inputs, since AES-GCM and ChaCha20-Poly1305 are standardized primitives with no implementation-defined behavior. A mismatch here means one implementation has a real bug (wrong key/nonce/AAD handling, wrong backend wiring, etc), not a legitimate divergence. Loaded directly by canopens_configurator_python/tests/test_kat_vectors.py; the two C repos' tests/test_nonce.c files hardcode a copy of these same values (see the comment there) rather than adding a JSON parser dependency to a plain-C test harness - if you change a vector here, update both C copies too.",
+  "key_len": 32,
+  "nonce_len": 16,
+  "auth_tag_size": 8,
+  "key_hex": "101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f",
+  "nonce_hex": "a0a1a2a3a4a5a6a7a8a9aaabacadaeaf",
+  "plaintext_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "aad_hex": "0102030405",
+  "vectors": [
+    {
+      "algorithm": "AES_GCM",
+      "ciphertext_hex": "24f26bc7e14189c513d2fb5a4888976bfba3cb476dacf61a2ab5199747b21bc2",
+      "tag_hex": "05636c3cb0b1ae94"
+    },
+    {
+      "algorithm": "CHACHA20_POLY1305",
+      "ciphertext_hex": "105dd85955e2c399f053c842e5d893934bae41aac80afaab9605c57345ea1c1d",
+      "tag_hex": "328cd06f61a2680f"
+    },
+    {
+      "algorithm": "ASCON128",
+      "ciphertext_hex": "f52d862a220a0b489ef21fd33f5b4e6942584c95f6221c0a2f9d71636c449b66",
+      "tag_hex": "3806e7f6c43e1adb",
+      "_note": "wolfSSL backend only - not comparable against mbedTLS (no ASCON support) or Python's mbedtls-only path if it lacks the wolfssl-py ASCON binding."
+    }
+  ]
+}
