@@ -40,19 +40,19 @@ class TestDeviceIsUnprovisioned(unittest.TestCase):
         self.assertFalse(device_is_unprovisioned(None))
 
     def test_none_key_id_is_unprovisioned(self):
-        dev = DiscoveredDevice(participant_id=120, provisioning_key_id=None)
+        dev = DiscoveredDevice(participant_id=120, integrator_key_id=None)
         self.assertTrue(device_is_unprovisioned(dev))
 
     def test_zero_key_id_is_unprovisioned(self):
-        dev = DiscoveredDevice(participant_id=120, provisioning_key_id=0x00000000)
+        dev = DiscoveredDevice(participant_id=120, integrator_key_id=0x00000000)
         self.assertTrue(device_is_unprovisioned(dev))
 
     def test_all_ones_key_id_is_unprovisioned(self):
-        dev = DiscoveredDevice(participant_id=120, provisioning_key_id=0xFFFFFFFF)
+        dev = DiscoveredDevice(participant_id=120, integrator_key_id=0xFFFFFFFF)
         self.assertTrue(device_is_unprovisioned(dev))
 
     def test_valid_key_id_is_provisioned(self):
-        dev = DiscoveredDevice(participant_id=120, provisioning_key_id=0x12345678)
+        dev = DiscoveredDevice(participant_id=120, integrator_key_id=0x12345678)
         self.assertFalse(device_is_unprovisioned(dev))
 
 

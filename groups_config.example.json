@@ -1,0 +1,142 @@
+{
+  "version": "1.0",
+  "export_timestamp": "2026-09-18T12:00:00.000000+00:00",
+  "groups": [
+    {
+      "group_id": 1,
+      "name": "Powertrain",
+      "description": "Primary powertrain cluster (TSA + motor + battery)",
+      "member_pids": [
+        120,
+        121,
+        122
+      ],
+      "created_at": "2026-09-18T12:00:00.000000+00:00",
+      "updated_at": "2026-09-18T12:00:00.000000+00:00",
+      "group_keys": {
+        "integrator_key": "2122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f40",
+        "integrator_salt": "aabbccddeeff0011",
+        "integrator_key_id": 555885348,
+        "seed_key": "4142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60",
+        "seed_salt": "1122334455667788",
+        "seed_key_id": 1094861636
+      }
+    },
+    {
+      "group_id": 2,
+      "name": "Chassis",
+      "description": "Chassis sensors and steering actuators",
+      "member_pids": [
+        123,
+        124
+      ],
+      "created_at": "2026-09-18T12:00:00.000000+00:00",
+      "updated_at": "2026-09-18T12:00:00.000000+00:00",
+      "group_keys": {
+        "integrator_key": "2122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f40",
+        "integrator_salt": "aabbccddeeff0011",
+        "integrator_key_id": 555885348,
+        "seed_key": "4142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60",
+        "seed_salt": "1122334455667788",
+        "seed_key_id": 1094861636
+      }
+    }
+  ],
+  "devices": [
+    {
+      "participant_id": 120,
+      "device_type": "Time Server Authority",
+      "firmware_version": "1.1.0",
+      "core_version": "1.1.0",
+      "mapping_version": "1.0",
+      "device_identification": "SPsec-TSA-Node120",
+      "mcu_serial_number": "000102030405060708090a0b0c0d0e0f",
+      "provisioning_key_id": 16909060,
+      "integrator_key_id": 555885348,
+      "seed_key_id": 1094861636,
+      "status": 2,
+      "last_security_event": 0,
+      "groups": [
+        1
+      ],
+      "last_seen": "2026-09-18T12:00:00.000000+00:00",
+      "last_heartbeat": null
+    },
+    {
+      "participant_id": 121,
+      "device_type": "Motor Controller",
+      "firmware_version": "1.1.0",
+      "core_version": "1.1.0",
+      "mapping_version": "1.0",
+      "device_identification": "SPsec-Motor-Node121",
+      "mcu_serial_number": "101112131415161718191a1b1c1d1e1f",
+      "provisioning_key_id": 16909060,
+      "integrator_key_id": 555885348,
+      "seed_key_id": 1094861636,
+      "status": 2,
+      "last_security_event": 0,
+      "groups": [
+        1
+      ],
+      "last_seen": "2026-09-18T12:00:00.000000+00:00",
+      "last_heartbeat": null
+    },
+    {
+      "participant_id": 122,
+      "device_type": "Battery Management",
+      "firmware_version": "1.1.0",
+      "core_version": "1.1.0",
+      "mapping_version": "1.0",
+      "device_identification": "SPsec-BMS-Node122",
+      "mcu_serial_number": "202122232425262728292a2b2c2d2e2f",
+      "provisioning_key_id": 16909060,
+      "integrator_key_id": 555885348,
+      "seed_key_id": 1094861636,
+      "status": 2,
+      "last_security_event": 0,
+      "groups": [
+        1
+      ],
+      "last_seen": "2026-09-18T12:00:00.000000+00:00",
+      "last_heartbeat": null
+    },
+    {
+      "participant_id": 123,
+      "device_type": "Steering Angle Sensor",
+      "firmware_version": "1.1.0",
+      "core_version": "1.1.0",
+      "mapping_version": "1.0",
+      "device_identification": "SPsec-Steer-Node123",
+      "mcu_serial_number": "303132333435363738393a3b3c3d3e3f",
+      "provisioning_key_id": 16909060,
+      "integrator_key_id": 555885348,
+      "seed_key_id": 1094861636,
+      "status": 2,
+      "last_security_event": 0,
+      "groups": [
+        2
+      ],
+      "last_seen": "2026-09-18T12:00:00.000000+00:00",
+      "last_heartbeat": null
+    },
+    {
+      "participant_id": 124,
+      "device_type": "Wheel Speed Sensor",
+      "firmware_version": "1.1.0",
+      "core_version": "1.1.0",
+      "mapping_version": "1.0",
+      "device_identification": "SPsec-Wheel-Node124",
+      "mcu_serial_number": "404142434445464748494a4b4c4d4e4f",
+      "provisioning_key_id": 16909060,
+      "integrator_key_id": 555885348,
+      "seed_key_id": 1094861636,
+      "status": 2,
+      "last_security_event": 0,
+      "groups": [
+        2
+      ],
+      "last_seen": "2026-09-18T12:00:00.000000+00:00",
+      "last_heartbeat": null
+    }
+  ]
+}

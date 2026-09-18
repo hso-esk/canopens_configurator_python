@@ -174,9 +174,7 @@ class OperationsPanel(ttk.Frame):
         )
         self.bootstrap_btn.pack(side=tk.RIGHT)
 
-        # Rotating the Seed key on an already-provisioned device is a separate
-        # operation from bootstrapping: bootstrap also writes the write-once
-        # Integrator key and so fails with KEY_ALREADY_SET on a live device.
+        # Seed key rotation is separate from bootstrapping on provisioned devices.
         self.rekey_seed_btn = ttk.Button(
             action_frame,
             text="Rekey Seed Key",

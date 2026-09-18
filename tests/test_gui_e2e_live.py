@@ -20,7 +20,18 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-_NO_DISPLAY = not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY")
+def _has_display():
+    if not os.environ.get("DISPLAY"):
+        return False
+    try:
+        import tkinter as tk
+        root = tk.Tk()
+        root.destroy()
+        return True
+    except Exception:
+        return False
+
+_NO_DISPLAY = not _has_display()
 _KEYS = os.environ.get("SPSEC_LIVE_KEYS")
 _SKIP = _NO_DISPLAY or not (_KEYS and os.path.isfile(_KEYS))
 
@@ -260,7 +271,7 @@ class TestGuiE2ELive(unittest.TestCase):
         print(f"  -> Testing Forward Flow: {self.insec_120} (PID {self.pids[0]}) -> {self.insec_121} (PID {self.pids[1]})...")
         rx_fwd_out = os.path.join(self.rundir, "rx_fwd.txt") if self.rundir else tempfile.mktemp()
         rx_proc_fwd = subprocess.Popen([
-            sys.executable, rx_script, "--channel", self.insec_121, "--count", "8", "--timeout", "5", "--out", rx_fwd_out
+            sys.executable, rx_script, "--channel", self.insec_121, "--count", "8", "--timeout", "5", "--standard-only", "--out", rx_fwd_out
         ])
         time.sleep(0.5)
 
@@ -282,7 +293,7 @@ class TestGuiE2ELive(unittest.TestCase):
         print(f"  -> Testing Reverse Flow: {self.insec_121} (PID {self.pids[1]}) -> {self.insec_120} (PID {self.pids[0]})...")
         rx_rev_out = os.path.join(self.rundir, "rx_rev.txt") if self.rundir else tempfile.mktemp()
         rx_proc_rev = subprocess.Popen([
-            sys.executable, rx_script, "--channel", self.insec_120, "--count", "8", "--timeout", "5", "--out", rx_rev_out
+            sys.executable, rx_script, "--channel", self.insec_120, "--count", "8", "--timeout", "5", "--standard-only", "--out", rx_rev_out
         ])
         time.sleep(0.5)
 

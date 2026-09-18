@@ -288,8 +288,10 @@ def cmd_provision_discovered(args, group_manager: GroupManager) -> int:
         print(f"\nFound {len(discovered)} device(s): "
               f"{len(unprovisioned)} unprovisioned, {len(already)} already provisioned")
         for d in already:
+            prov_str = f"0x{d.provisioning_key_id:08X}" if d.provisioning_key_id is not None else "none"
+            int_str = f"0x{d.integrator_key_id:08X}" if d.integrator_key_id is not None else "none"
             print(f"  PID {d.participant_id}: skipped "
-                  f"(provisioning key 0x{d.provisioning_key_id:08X} already installed)")
+                  f"(already provisioned: prov={prov_str}, int={int_str})")
         if not unprovisioned:
             print("Nothing to provision.\n")
             return 0
@@ -321,8 +323,11 @@ def cmd_provision_discovered(args, group_manager: GroupManager) -> int:
         cfg = configurator_init(args.interface, args.keys_file)
         cfg.tx_delay_us = max(0, int(args.tx_delay_us or 0))
         try:
+            device_obj = next((d for d in unprovisioned if d.participant_id == pid), None)
+            has_prov = (device_obj and device_obj.provisioning_key_id not in (None, 0x00000000, 0xFFFFFFFF))
+            start_selector = SPSEC_KEY_SELECTOR_PROVISIONING_KEY if has_prov else SPSEC_KEY_SELECTOR_ZERO_KEY
             ret = configurator_establish_keys_sequential(
-                cfg, pid, SPSEC_KEY_SELECTOR_ZERO_KEY,
+                cfg, pid, start_selector,
                 provisioning_key=_key(cfg, 1), provisioning_salt=_salt(cfg, 1),
                 provisioning_key_id=_key_id_of(cfg, 1),
                 integrator_key=_key(cfg, 2), integrator_salt=_salt(cfg, 2),

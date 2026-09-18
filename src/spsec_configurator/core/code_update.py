@@ -26,9 +26,7 @@ SPSEC_REG_CODE_UPDATE_CAPABILITIES = 0x90
 SPSEC_REG_PUBLIC_AUTH_KEY = 0x91
 SPSEC_REG_CODE_UPDATE_FILE = 0x92
 
-#: The participant's 92h register is bounded by SPSEC_REG_CODE_UPDATE_FILE_MAX_LEN
-#: (4096 bytes). Refuse images above this limit early rather than failing at
-#: the Write Initiate stage.
+#: Maximum firmware image size accepted by register 92h (4096 bytes).
 MAX_IMAGE_BYTES = 4096
 
 
@@ -114,9 +112,7 @@ def upload_code_update_file(
             )
             return -3
 
-        # Informational: the participant fails the 92h write closed when it
-        # has no public key, so surface that before the transfer rather than
-        # after it.
+        # Check public key availability before starting firmware transfer.
         if read_public_auth_key(cfg, target_pid) is None:
             log_warning(
                 "code_update",

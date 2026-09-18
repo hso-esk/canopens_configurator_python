@@ -122,9 +122,9 @@ def main(argv: list[str] | None = None) -> int:
             configurator_terminate_session(cfg, args.pid)
             return 0
 
-        # Sequential key establishment (Zero -> Provisioning -> Integrator -> Seed)
+        # Sequential key establishment
         ret = configurator_establish_keys_sequential(
-            cfg, args.pid, SPSEC_KEY_SELECTOR_ZERO_KEY,
+            cfg, args.pid, SESSION_KEY_SELECTORS[args.key],
             provisioning_key=cfg.comm_keys.spsec_keys[1].key if cfg.comm_keys.spsec_keys[1] else None,
             provisioning_salt=cfg.comm_keys.spsec_salt[1].salt if cfg.comm_keys.spsec_salt[1] else None,
             provisioning_key_id=cfg.comm_keys.spsec_keys[1].key_id if cfg.comm_keys.spsec_keys[1] else None,

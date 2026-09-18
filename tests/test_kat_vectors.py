@@ -1,3 +1,14 @@
+#
+# Copyright (c) 2026
+#
+# Hochschule Offenburg, University of Applied Sciences
+# Institute for reliable Embedded Systems
+# and Communications Electronic (ivESK)
+#
+# This file is licensed as described in the "LICENSE" file
+# included within the root folder of this work.
+#
+
 """Cross-implementation AEAD known-answer test.
 Verifies this Python crypto matches the C implementation byte-for-byte using shared vectors from ../../test_vectors/aead_kat.json.
 """

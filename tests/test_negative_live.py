@@ -1,3 +1,14 @@
+#
+# Copyright (c) 2026
+#
+# Hochschule Offenburg, University of Applied Sciences
+# Institute for reliable Embedded Systems
+# and Communications Electronic (ivESK)
+#
+# This file is licensed as described in the "LICENSE" file
+# included within the root folder of this work.
+#
+
 """§11 D negative/fault-injection tests; needs a live participant, else skipped.
 Fault injection wraps `_send_appdata()`, the single outgoing choke point."""
 

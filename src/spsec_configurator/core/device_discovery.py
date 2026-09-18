@@ -231,9 +231,8 @@ def get_device_info(
 
 
 def device_is_unprovisioned(device) -> bool:
-    """True if the device has no usable Provisioning Key (None, or the
-    erased sentinel FFFFFFFFh/0, same as register_is_key_set() on-device)."""
+    """True if the device has not yet been provisioned with an Integrator Key."""
     if device is None:
         return False
-    key_id = device.provisioning_key_id
-    return key_id is None or key_id in (0x00000000, 0xFFFFFFFF)
+    int_id = device.integrator_key_id
+    return int_id is None or int_id in (0x00000000, 0xFFFFFFFF)

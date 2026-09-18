@@ -341,9 +341,7 @@ def update_group_keys(
     ack_timeout_s: float = 10.0,
     revert_on_timeout: bool = True,
 ) -> int:
-    """Distribute new_keys to every member; a write succeeding doesn't mean
-    the member is running on it yet, so wait for ack_timeout_s and revert on
-    timeout (unless disabled) to avoid a silently split group."""
+    """Distribute new keys to members and verify acknowledgment within timeout."""
     import time
 
     group = group_manager.get_group(group_id)
@@ -385,9 +383,7 @@ def update_group_keys(
                           "Reverting group %d to the previous key set", group_id)
                 group_manager.set_group_keys(group_id, old_keys)
                 if old_keys is not None:
-                    # Best effort: members that did take the new keys must be put
-                    # back, or the group stays split. Members that never
-                    # acknowledged are presumably still on the old keys anyway.
+                    # Revert acknowledged members on timeout to prevent split group state.
                     revert_ret = distribute_group_keys(cfg, group_manager, group_id)
                     if revert_ret < 0:
                         log_error(

@@ -1,3 +1,14 @@
+#
+# Copyright (c) 2026
+#
+# Hochschule Offenburg, University of Applied Sciences
+# Institute for reliable Embedded Systems
+# and Communications Electronic (ivESK)
+#
+# This file is licensed as described in the "LICENSE" file
+# included within the root folder of this work.
+#
+
 """CONFIGURATOR_REQUIREMENTS.md §14.1: code update transport (90h-92h).
 Pins the 90h bit layout (SPsec302 §2.3.7.1) and upload guards (empty/oversize/no-capability).
 """

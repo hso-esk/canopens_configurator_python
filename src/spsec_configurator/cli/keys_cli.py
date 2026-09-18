@@ -330,11 +330,7 @@ def main(argv: "list[str] | None" = None) -> int:
     parser = argparse.ArgumentParser(
         description="Secure Key Store Management",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s create keys.enc --generate
-  %(prog)s import keys.txt keys.enc
-        """,
+        epilog="""Examples: %(prog)s create keys.enc --generate | import keys.txt keys.enc""",
     )
     
     subparsers = parser.add_subparsers(dest="command", help="Command")

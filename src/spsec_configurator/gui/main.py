@@ -31,12 +31,7 @@ def main(argv: "list[str] | None" = None) -> int:
     parser = argparse.ArgumentParser(
         description="SPsec Configurator GUI",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python -m spsec_configurator.gui.main
-  python -m spsec_configurator.gui.main --interface can0
-  python -m spsec_configurator.gui.main --keys-file /path/to/keys.txt
-        """,
+        epilog="""Example: python -m spsec_configurator.gui.main [--interface can0]""",
     )
     
     parser.add_argument(

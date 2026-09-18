@@ -1,3 +1,14 @@
+#
+# Copyright (c) 2026
+#
+# Hochschule Offenburg, University of Applied Sciences
+# Institute for reliable Embedded Systems
+# and Communications Electronic (ivESK)
+#
+# This file is licensed as described in the "LICENSE" file
+# included within the root folder of this work.
+#
+
 """TC-CFG-016: session terminate counter accounting.
 Regression test for an off-by-one (compared against session_cnt+1) that made every terminate fail and skipped auth-tag verification.
 """

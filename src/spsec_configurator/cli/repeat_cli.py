@@ -310,9 +310,7 @@ def main(argv: list[str] | None = None) -> int:
                             elif re_clienthello.search(message):
                                 mm = re_clienthello.search(message)
                                 parsed_summary = f"ClientHello pid={mm.group(1)}"
-                                # Reset relative anchor on ClientHello
-                                # Use the projected timestamp for better accuracy
-                                # Will be set after project_tick() call below
+                                # Reset relative anchor on ClientHello with projected timestamp.
                             elif re_clientfinish.search(message):
                                 mm = re_clientfinish.search(message)
                                 parsed_summary = f"ClientFinish pid={mm.group(1)}"

@@ -7,16 +7,7 @@
 # This file is licensed as described in the "LICENSE" file
 # included within the root folder of this work.
 
-"""wolfSSL ASCON wrapper via wolfssl-py, matching the participant's wolfSSL impl."""
-
-"""
-wolfSSL ASCON wrapper using ctypes to call the wolfSSL C library directly.
-This ensures 100% compatibility with the participant's wolfSSL implementation.
-
-Note: The official wolfssl-py library is primarily for TLS/SSL operations and doesn't
-expose low-level crypto functions like ASCON. The implementation uses ctypes to access
-the underlying wolfSSL C library directly.
-"""
+"""wolfSSL ASCON ctypes wrapper calling the wolfSSL C library directly."""
 
 import ctypes
 import hmac

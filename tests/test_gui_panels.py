@@ -1,3 +1,14 @@
+#
+# Copyright (c) 2026
+#
+# Hochschule Offenburg, University of Applied Sciences
+# Institute for reliable Embedded Systems
+# and Communications Electronic (ivESK)
+#
+# This file is licensed as described in the "LICENSE" file
+# included within the root folder of this work.
+#
+
 """CONFIGURATOR_REQUIREMENTS.md §11 E: GUI panel tests, driven under a hidden Tk root via injectable callbacks.
 Needs a display; skip cleanly when none (run under xvfb-run otherwise).
 """
@@ -5,7 +16,18 @@ Needs a display; skip cleanly when none (run under xvfb-run otherwise).
 import os
 import unittest
 
-_NO_DISPLAY = not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY")
+def _has_display():
+    if not os.environ.get("DISPLAY"):
+        return False
+    try:
+        import tkinter as tk
+        root = tk.Tk()
+        root.destroy()
+        return True
+    except Exception:
+        return False
+
+_NO_DISPLAY = not _has_display()
 
 if not _NO_DISPLAY:
     try:

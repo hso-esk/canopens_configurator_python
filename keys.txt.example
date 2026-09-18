@@ -1,0 +1,8 @@
+# SPsec EXAMPLE / TEST key vectors - PUBLIC, non-secret. Do NOT use in production.
+# Copy this file to keys.txt (the default -k/--keys_file path) to try the CLI/GUI.
+provisioning_key:0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20
+provisioning_salt:eecc60a9643e5a0aeecc60a9643e5a0a
+integrator_key:2122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f40
+integrator_salt:aabbccddeeff0011aabbccddeeff0011
+seed_key:4142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60
+seed_salt:11223344556677881122334455667788

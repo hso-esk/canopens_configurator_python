@@ -784,7 +784,15 @@ def configurator_bootstrap_device(
             log_error("configurator", "Failed to write integrator key ID: %d", ret)
             return ret
 
-        # Step 5: Provision seed key (first invalidate Key ID with 0xFFFFFFFF)
+        # Step 5: Terminate Provisioning session and start Integrator session to write Seed key
+        log_info("configurator", "Terminating Provisioning session to establish Integrator session for Seed key")
+        configurator_terminate_session(cfg, target_pid)
+        ret = configurator_start_session(cfg, target_pid, SPSEC_KEY_SELECTOR_INTEGRATOR_KEY, SESSION_TIMEOUT_S)
+        if ret < 0:
+            log_error("configurator", "Failed to start Integrator session for Seed key: %d", ret)
+            return ret
+
+        # Step 6: Provision seed key (first invalidate Key ID with 0xFFFFFFFF)
         log_info("configurator", "Provisioning seed key...")
         ret = configurator_write_register(cfg, target_pid, SPSEC_REG_SEED_KEY_ID, invalid_key_id_bytes, 4)
         if ret < 0:
@@ -796,13 +804,13 @@ def configurator_bootstrap_device(
             log_error("configurator", "Failed to write seed key: %d", ret)
             return ret
         
-        # Step 6: Provision seed salt
+        # Step 7: Provision seed salt
         ret = configurator_write_register(cfg, target_pid, SPSEC_REG_SEED_KEY_SALT, seed_salt, SALT_LEN)
         if ret < 0:
             log_error("configurator", "Failed to write seed salt: %d", ret)
             return ret
         
-        # Step 7: Provision seed key ID
+        # Step 8: Provision seed key ID
         seed_key_id_bytes = seed_key_id.to_bytes(4, "little")
         ret = configurator_write_register(cfg, target_pid, SPSEC_REG_SEED_KEY_ID, seed_key_id_bytes, 4)
         if ret < 0:
@@ -843,7 +851,7 @@ def configurator_establish_keys_sequential(
     
     # Key sequence mapping: {initial_key: [keys_to_write]}
     KEY_SEQUENCE = {
-        SPSEC_KEY_SELECTOR_ZERO_KEY: [SPSEC_KEY_SELECTOR_PROVISIONING_KEY, SPSEC_KEY_SELECTOR_INTEGRATOR_KEY, SPSEC_KEY_SELECTOR_SEED_KEY],  # Zero → Provisioning → Integrator → Seed
+        SPSEC_KEY_SELECTOR_ZERO_KEY: [SPSEC_KEY_SELECTOR_INTEGRATOR_KEY, SPSEC_KEY_SELECTOR_SEED_KEY],  # Zero → Integrator → Seed (when no Prov Key)
         SPSEC_KEY_SELECTOR_PROVISIONING_KEY: [SPSEC_KEY_SELECTOR_INTEGRATOR_KEY, SPSEC_KEY_SELECTOR_SEED_KEY],     # Provisioning → Integrator → Seed
         SPSEC_KEY_SELECTOR_INTEGRATOR_KEY: [SPSEC_KEY_SELECTOR_SEED_KEY],         # Integrator → Seed
         # No Seed entry: the Seed key cannot open a configuration session

@@ -1,3 +1,14 @@
+#
+# Copyright (c) 2026
+#
+# Hochschule Offenburg, University of Applied Sciences
+# Institute for reliable Embedded Systems
+# and Communications Electronic (ivESK)
+#
+# This file is licensed as described in the "LICENSE" file
+# included within the root folder of this work.
+#
+
 import unittest
 import tempfile
 import secrets
@@ -271,9 +282,7 @@ class TestRemoveDeviceRekeySurvivors(unittest.TestCase):
         group_after = self.group_manager.get_group(3)
         self.assertNotIn(301, group_after.member_pids, "PID 301 should be removed from group")
 
-        # The two survivors (300, 302) should have been re-keyed
-        # (they will appear in recorded_pids from the update_group_keys call)
-        # PID 301 should NOT appear in the bootstrap calls after removal
+        # Surviving nodes (300, 302) re-keyed; removed node 301 is not bootstrapped.
         self.assertIn(300, recorded_pids, "Survivor PID 300 should receive new keys")
         self.assertIn(302, recorded_pids, "Survivor PID 302 should receive new keys")
 

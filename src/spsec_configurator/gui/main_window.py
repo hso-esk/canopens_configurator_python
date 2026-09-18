@@ -41,7 +41,12 @@ from .workers import (
     BatchBootstrapWorker,
     ProvisionDiscoveredWorker,
 )
-from ..core.spsec_definitions import SPSEC_KEY_SELECTOR_INTEGRATOR_KEY
+from ..core.spsec_definitions import (
+    SPSEC_KEY_SELECTOR_ZERO_KEY,
+    SPSEC_KEY_SELECTOR_PROVISIONING_KEY,
+    SPSEC_KEY_SELECTOR_INTEGRATOR_KEY,
+    SPSEC_STATE_WAITING,
+)
 
 
 class MainWindow(tk.Tk):
@@ -470,8 +475,8 @@ class MainWindow(tk.Tk):
             log_error("gui", "Failed to export keys for workers: %s", str(e))
             self._temp_keys_file = None
     
-    def _get_usable_keys_file(self) -> "str | None":
-        """Get a usable keys file path (plain text) for workers"""
+    def _get_usable_keys_file(self, optional: bool = False) -> "str | None":
+        """Get usable keys file path (plain text), returning None if optional."""
         from pathlib import Path
         from ..core.logging_util import log_info, log_debug, log_warning, log_error
         
@@ -496,8 +501,17 @@ class MainWindow(tk.Tk):
                 else:
                     log_error("gui", "Failed to re-export keys")
         
-        # Check if keys file exists
-        if not Path(keys_file).exists():
+        # Check if keys file exists; fall back to example file if default keys.txt is missing
+        if not keys_file or not Path(keys_file).exists():
+            for cand in ["keys.txt", "keys.txt.example", "../keys.txt.example", "../keys.txt"]:
+                if Path(cand).exists():
+                    keys_file = str(Path(cand).resolve())
+                    self._settings["keys_file"] = keys_file
+                    break
+        if not keys_file or not Path(keys_file).exists():
+            if optional:
+                log_debug("gui", "Keys file not set or missing, but optional for this operation")
+                return None
             log_error("gui", "Keys file not found: %s", keys_file)
             messagebox.showerror(
                 "Keys Not Found",
@@ -510,16 +524,16 @@ class MainWindow(tk.Tk):
             return None
         
         # Check if it's an encrypted file being used directly (error)
-        if keys_file.endswith(".enc"):
-            if not self._key_store:
-                log_error("gui", "Encrypted store not loaded: %s", keys_file)
-                messagebox.showerror(
-                    "Encrypted Store Not Loaded",
-                    "The keys file is encrypted but not loaded.\n\n"
-                    "Please go to Settings > Keys and click 'Load Key Store' to unlock it."
-                )
+        if keys_file.endswith(".enc") and not self._key_store:
+            if optional:
                 return None
-        
+            log_error("gui", "Encrypted store not loaded: %s", keys_file)
+            messagebox.showerror(
+                "Encrypted Store Not Loaded",
+                "The keys file is encrypted but not loaded.\n\n"
+                "Please go to Settings > Keys and click 'Load Key Store' to unlock it."
+            )
+            return None
         log_info("gui", "Using plain text keys file: %s", keys_file)
         return keys_file
     
@@ -538,11 +552,16 @@ class MainWindow(tk.Tk):
                 # Fall back to direct file loading
                 from spsec_configurator.core.keys import load_kv_hex_file
                 keys_file = self._settings["keys_file"]
+                if not keys_file or not Path(keys_file).exists():
+                    for cand in ["keys.txt", "keys.txt.example", "../keys.txt.example", "../keys.txt"]:
+                        if Path(cand).exists():
+                            keys_file = str(Path(cand).resolve())
+                            self._settings["keys_file"] = keys_file
+                            break
                 integrator_key = load_kv_hex_file(keys_file, "integrator_key")
                 integrator_salt = load_kv_hex_file(keys_file, "integrator_salt")
                 seed_key = load_kv_hex_file(keys_file, "seed_key")
                 seed_salt = load_kv_hex_file(keys_file, "seed_salt")
-                
                 if provisioning_key is None:
                     provisioning_key = load_kv_hex_file(keys_file, "provisioning_key")
                 if provisioning_salt is None:
@@ -591,9 +610,10 @@ class MainWindow(tk.Tk):
             messagebox.showwarning("Busy", "An operation is already in progress")
             return
         
-        # Get keys file path (export encrypted store if needed)
-        keys_file = self._get_usable_keys_file()
-        if keys_file is None:
+        # For Zero-Key discovery, secret keys file is optional
+        discovery_key = self._settings.get("discovery_key", 1)
+        keys_file = self._get_usable_keys_file(optional=(discovery_key == 1))
+        if keys_file is None and discovery_key != 1:
             return
         
         self._set_status("Discovering devices...")
@@ -704,9 +724,7 @@ class MainWindow(tk.Tk):
                 "message": message,
             })
         
-        # Establish keys sequentially for each device
-        # For simplicity, processing occurs one device at a time
-        # A full implementation would use a batch worker
+        # Establish keys sequentially for each device.
         total = len(pids)
         for i, pid in enumerate(pids):
             if self._current_worker and self._current_worker.is_alive():
@@ -721,11 +739,39 @@ class MainWindow(tk.Tk):
             provisioning_salt = keys.get("provisioning_salt")
             provisioning_key_id = keys.get("provisioning_key_id")
             
+            dev = self.device_panel.devices.get(pid) if hasattr(self, "device_panel") else None
+            has_prov = (dev and dev.provisioning_key_id not in (None, 0x00000000, 0xFFFFFFFF))
+            has_int = (dev and dev.integrator_key_id not in (None, 0x00000000, 0xFFFFFFFF))
+            pid_key_selector = initial_key_selector
+            if initial_key_selector == 1 or initial_key_selector is None:
+                if has_int:
+                    pid_key_selector = SPSEC_KEY_SELECTOR_INTEGRATOR_KEY
+                elif has_prov:
+                    pid_key_selector = SPSEC_KEY_SELECTOR_PROVISIONING_KEY
+                else:
+                    pid_key_selector = SPSEC_KEY_SELECTOR_ZERO_KEY
+            
+            def make_device_on_complete(target_pid):
+                def _doc(res):
+                    if res.status == WorkerStatus.COMPLETED and res.result == 0:
+                        if hasattr(self, "device_panel") and target_pid in self.device_panel.devices:
+                            d = self.device_panel.devices[target_pid]
+                            if keys.get("integrator_key_id") is not None:
+                                d.integrator_key_id = keys["integrator_key_id"]
+                            if keys.get("seed_key_id") is not None:
+                                d.seed_key_id = keys["seed_key_id"]
+                            d.status = SPSEC_STATE_WAITING
+                            self.device_panel.add_device(d)
+                        if self._group_manager:
+                            self._group_manager.register_device(target_pid)
+                    on_complete(res)
+                return _doc
+
             self._current_worker = SequentialKeyEstablishmentWorker(
                 interface=self._settings["interface"],
                 keys_file=worker_keys_file,
                 participant_id=pid,
-                initial_key_selector=initial_key_selector,
+                initial_key_selector=pid_key_selector,
                 integrator_key=keys["integrator_key"],
                 integrator_salt=keys["integrator_salt"],
                 integrator_key_id=keys["integrator_key_id"],
@@ -736,7 +782,7 @@ class MainWindow(tk.Tk):
                 provisioning_salt=provisioning_salt,
                 provisioning_key_id=provisioning_key_id,
                 on_progress=on_progress,
-                on_complete=on_complete,
+                on_complete=make_device_on_complete(pid),
                 on_error=on_error,
             )
             self._current_worker.start()
@@ -786,9 +832,15 @@ class MainWindow(tk.Tk):
         self._current_worker = None
         
         if result.status == WorkerStatus.COMPLETED:
+            if isinstance(result.result, int) and result.result < 0:
+                self._set_status(f"Operation failed with error: {result.result}")
+                show_error(self, "Operation Failed", f"Operation failed with error code {result.result}")
+                return
             self._set_status("Operation completed successfully")
             self._refresh_groups()
             self._update_counts()
+            if hasattr(self, "device_panel"):
+                self.device_panel._refresh_tree()
         elif result.status == WorkerStatus.CANCELLED:
             self._set_status("Operation cancelled")
         elif result.status == WorkerStatus.FAILED:
@@ -984,6 +1036,17 @@ class MainWindow(tk.Tk):
             })
         
         def on_complete(result: WorkerResult):
+            if result.status == WorkerStatus.COMPLETED and result.result == 0:
+                if hasattr(self, "device_panel") and pid in self.device_panel.devices:
+                    dev = self.device_panel.devices[pid]
+                    if keys.get("integrator_key_id") is not None:
+                        dev.integrator_key_id = keys["integrator_key_id"]
+                    if keys.get("seed_key_id") is not None:
+                        dev.seed_key_id = keys["seed_key_id"]
+                    dev.status = SPSEC_STATE_WAITING
+                    self.device_panel.add_device(dev)
+                if self._group_manager:
+                    self._group_manager.register_device(pid)
             self._update_queue.put({
                 "type": "complete",
                 "result": result,
@@ -995,9 +1058,18 @@ class MainWindow(tk.Tk):
                 "message": message,
             })
         
-        # Get initial key selector (default to Provisioning if not specified)
-        initial_key_selector = keys.get("initial_key_selector", 1)
-        
+        # Determine starting key selector based on device state if not explicitly specified
+        initial_key_selector = keys.get("initial_key_selector")
+        if initial_key_selector is None:
+            dev = self.device_panel.devices.get(pid) if hasattr(self, "device_panel") else None
+            has_prov = (dev and dev.provisioning_key_id not in (None, 0x00000000, 0xFFFFFFFF))
+            has_int = (dev and dev.integrator_key_id not in (None, 0x00000000, 0xFFFFFFFF))
+            if has_int:
+                initial_key_selector = SPSEC_KEY_SELECTOR_INTEGRATOR_KEY
+            elif has_prov:
+                initial_key_selector = SPSEC_KEY_SELECTOR_PROVISIONING_KEY
+            else:
+                initial_key_selector = SPSEC_KEY_SELECTOR_ZERO_KEY
         # Get usable keys file for worker
         worker_keys_file = self._get_usable_keys_file()
         if worker_keys_file is None:
@@ -1358,9 +1430,7 @@ class MainWindow(tk.Tk):
                 return
             self._current_worker.cancel()
 
-        # Cancelling only sets a flag the thread's loop polls (up to ~500ms for
-        # the heartbeat listener) - join so the CAN socket each thread owns is
-        # actually closed before the window (and process) goes away.
+        # Join worker threads so CAN sockets close cleanly before window exits.
         if self._hb_listener:
             self._hb_listener.join(timeout=2.0)
         if self._current_worker:

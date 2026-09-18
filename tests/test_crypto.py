@@ -1,3 +1,14 @@
+#
+# Copyright (c) 2026
+#
+# Hochschule Offenburg, University of Applied Sciences
+# Institute for reliable Embedded Systems
+# and Communications Electronic (ivESK)
+#
+# This file is licensed as described in the "LICENSE" file
+# included within the root folder of this work.
+#
+
 """Unit tests for crypto primitives (CONFIGURATOR_REQUIREMENTS.md §11 A, TC-CFG-001/002/003/004/009).
 Note: SPsec uses 256-bit keys, so AES suite is AES-256-GCM with 8-byte truncated tags.
 """
